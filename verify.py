@@ -1,0 +1,11 @@
+import ast
+c = open('app.py', encoding='utf-8').read()
+ast.parse(c)
+print("Syntax OK")
+print("contagion engine:", 'def generate_contagion_chains' in c)
+print("fallback chains:", 'def generate_fallback_chains' in c)
+print("render section:", 'def render_contagion_section' in c)
+print("pipeline wired:", 'Modeling contagion propagation' in c)
+print("results wired:", 'render_contagion_section' in c)
+print("hover br tags:", '<b>{n.label}</b><br>' in c)
+print("hoverlabel:", 'hoverlabel=dict' in c)
