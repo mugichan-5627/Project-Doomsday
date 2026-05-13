@@ -26,7 +26,7 @@ Enter any stock ticker. In 60 seconds, the system:
 ## Setup
 
 ### Option 1: Use the deployed app
-Visit the Streamlit deployment and enter your API keys directly in the sidebar.
+Visit the Streamlit deployment: [ENTER_YOUR_DEPLOYED_URL_HERE] (Paste your URL here after deploying on Streamlit Cloud).
 
 ### Option 2: Run locally
 1. Clone this repo
@@ -42,7 +42,7 @@ TAVILY_API_KEY=your_key_here
 - **Google AI Studio (Gemini):** https://ai.google.dev
 - **NVIDIA NIM:** https://build.nvidia.com
 - **Fireworks AI:** https://fireworks.ai
-- **Tavily:** https://tavily.com
+- **Tavily (Optional):** https://tavily.com (Analysis works without this using fallback news modeling).
 
 ## Features
 
