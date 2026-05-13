@@ -26,7 +26,7 @@ Enter any stock ticker. In 60 seconds, the system:
 ## Setup
 
 ### Option 1: Use the deployed app
-Visit the Streamlit deployment: [ENTER_YOUR_DEPLOYED_URL_HERE] (Paste your URL here after deploying on Streamlit Cloud).
+Visit the live dashboard: **[https://project-doomsday.streamlit.app/](https://project-doomsday.streamlit.app/)**
 
 ### Option 2: Run locally
 1. Clone this repo
