@@ -1132,44 +1132,57 @@ def map_risks_to_coords(verdicts: List[RiskVerdict]) -> List[FractureNode]:
         "india": (20.59, 78.96), "mumbai": (19.07, 72.87), "bangalore": (12.97, 77.59),
         "delhi": (28.61, 77.20), "hyderabad": (17.38, 78.48), "chennai": (13.08, 80.27),
         "japan": (35.67, 139.65), "tokyo": (35.67, 139.65), "osaka": (34.69, 135.50),
-        "south korea": (37.56, 126.97), "seoul": (37.56, 126.97),
+        "south korea": (37.56, 126.97), "seoul": (37.56, 126.97), "korea": (37.56, 126.97),
         "singapore": (1.35, 103.81), "vietnam": (14.05, 108.27), "philippines": (12.87, 121.77),
+        "asia": (34.0, 100.0), "southeast asia": (10.0, 110.0),
         
         # --- Americas ---
-        "usa": (37.09, -95.71), "washington": (38.90, -77.04), "new york": (40.71, -74.00),
+        "usa": (37.09, -95.71), "united states": (37.09, -95.71), "america": (37.09, -95.71),
+        "washington": (38.90, -77.04), "new york": (40.71, -74.00),
         "silicon valley": (37.38, -122.05), "san francisco": (37.77, -122.42),
         "mountain view": (37.42, -122.08), "cupertino": (37.32, -122.03),
         "palo alto": (37.44, -122.14), "santa clara": (37.35, -121.95),
         "seattle": (47.60, -122.33), "redmond": (47.67, -122.12), "austin": (30.26, -97.74),
         "california": (36.77, -119.41), "texas": (31.96, -99.90), "florida": (27.66, -81.51),
         "canada": (56.13, -106.34), "brazil": (-14.23, -51.92), "mexico": (23.63, -102.55),
+        "north america": (45.0, -100.0), "south america": (-15.0, -60.0),
 
         # --- Europe ---
         "germany": (51.16, 10.45), "europe": (48.85, 2.35), "london": (51.50, -0.12),
         "paris": (48.85, 2.35), "berlin": (52.52, 13.40), "amsterdam": (52.36, 4.90),
         "brussels": (50.85, 4.35), "switzerland": (46.81, 8.22), "ukraine": (50.45, 30.52),
         "russia": (55.75, 37.61), "moscow": (55.75, 37.61),
-
+        "uk": (55.37, -3.43), "united kingdom": (55.37, -3.43),
+ 
         # --- MEA & Others ---
         "middle east": (25.20, 55.27), "dubai": (25.20, 55.27), "israel": (31.77, 35.22),
         "tel aviv": (32.08, 34.78), "strait of hormuz": (26.57, 56.25), "red sea": (20.0, 38.0),
         "australia": (-25.27, 133.77), "sydney": (-33.86, 151.20),
-        "global": (20.0, 0.0), # Middle of Atlantic/Global
+        "global": (20.0, 0.0), "worldwide": (20.0, 0.0),
         "taiwan strait": (24.50, 119.50), "south china sea": (15.0, 115.0),
+        "africa": (1.0, 20.0),
     }
     
     def find_coords(text: str) -> Tuple[float, float]:
         text_lower = text.lower()
+        
+        # 1. Direct key match
         for key, coords in COORDS.items():
             if key in text_lower:
                 return coords
         
-        # Smart fallback: If we have an HQ, use its vicinity instead of Africa
+        # 2. Multi-region splitting (e.g. "USA, Asia")
+        parts = [p.strip() for p in text_lower.replace(",", " ").replace("/", " ").split()]
+        for p in parts:
+            if p in COORDS:
+                return COORDS[p]
+        
+        # 3. HQ Fallback (Anchor unknown nodes near HQ)
         if "hq" in st.session_state and st.session_state.hq:
             hq_lat, hq_lon, _ = st.session_state.hq
-            return (hq_lat + np.random.uniform(-5, 5), hq_lon + np.random.uniform(-5, 5))
+            return (hq_lat + np.random.uniform(-4, 4), hq_lon + np.random.uniform(-4, 4))
             
-        return (35.0 + np.random.uniform(-10, 10), -40.0 + np.random.uniform(-20, 20)) # Mid-Atlantic/Neutral
+        return (25.0 + np.random.uniform(-5, 5), -35.0 + np.random.uniform(-10, 10)) # Neutral Atlantic
     
     nodes = []
     for i, v in enumerate(verdicts):
@@ -2501,10 +2514,10 @@ def main():
         add_log("Mapping fracture nodes to coordinates...", "info")
         render_terminal()
         
-        nodes = map_risks_to_coords(verdicts)
         hq = get_hq_coords(ticker, company.name)
-        st.session_state.nodes = nodes
         st.session_state.hq = hq
+        nodes = map_risks_to_coords(verdicts)
+        st.session_state.nodes = nodes
         add_log(f"Mapped {len(nodes)} nodes | HQ: {hq[2]}", "ok")
         
         progress_bar.progress(85, text="Mapping Complete")
