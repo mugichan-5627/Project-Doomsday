@@ -17,6 +17,7 @@ from datetime import datetime
 from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass, field
 from dotenv import load_dotenv
+import requests
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 import threading
 
@@ -663,25 +664,64 @@ def fetch_company_data(ticker: str) -> Optional[CompanyData]:
     
     def _fetch():
         import yfinance as yf
+        import time
         
         # Resolve ticker (handles Indian auto-suffix)
         resolved = resolve_ticker(ticker)
         
+        def _get_info(stock_obj):
+            """Internal helper to get info with retries and fallback."""
+            # Attempt 1: Standard info
+            try:
+                inf = stock_obj.info
+                if inf and inf.get("marketCap", 0) > 0:
+                    return inf
+            except Exception as e:
+                pass
+            
+            # Attempt 2: Wait and retry info
+            time.sleep(1.5)
+            try:
+                inf = stock_obj.info
+                if inf and inf.get("marketCap", 0) > 0:
+                    return inf
+            except:
+                pass
+                
+            # Attempt 3: Fallback to fast_info for critical metrics
+            try:
+                fi = stock_obj.fast_info
+                if fi and fi.get("marketCap", 0) > 0:
+                    return {
+                        "marketCap": fi.get("marketCap"),
+                        "currentPrice": fi.get("lastPrice"),
+                        "regularMarketPrice": fi.get("lastPrice"),
+                        "sharesOutstanding": fi.get("shares"),
+                        "currency": fi.get("currency", "USD"),
+                        "sector": "Unknown (FastInfo Fallback)",
+                        "industry": "Unknown (FastInfo Fallback)",
+                        "longName": resolved,
+                        "quoteType": fi.get("quoteType", "EQUITY")
+                    }
+            except:
+                pass
+            return {}
+
         # Try resolved ticker first
         stock = yf.Ticker(resolved)
-        info = stock.info
+        info = _get_info(stock)
         
         # If failed and no suffix, try .NS (Indian NSE)
         if (not info or info.get("marketCap", 0) == 0) and "." not in ticker:
             resolved = f"{ticker.upper()}.NS"
             stock = yf.Ticker(resolved)
-            info = stock.info
+            info = _get_info(stock)
         
         # If still failed and was .NS, try .BO (Bombay SE)
         if (not info or info.get("marketCap", 0) == 0) and resolved.endswith(".NS"):
             resolved = resolved.replace(".NS", ".BO")
             stock = yf.Ticker(resolved)
-            info = stock.info
+            info = _get_info(stock)
         
         if not info or info.get("marketCap", 0) == 0:
             return None
@@ -725,7 +765,6 @@ def fetch_company_data(ticker: str) -> Optional[CompanyData]:
                 return 0.0
             if currency == "USD":
                 return float(value)
-            # For INR and other currencies where rate = local/USD
             return float(value) / usd_rate
         
         # Build CompanyData — everything in USD
@@ -747,7 +786,7 @@ def fetch_company_data(ticker: str) -> Optional[CompanyData]:
             pe_ratio=float(info.get("trailingPE", 0) or 0),
         )
     
-    return run_with_timeout(_fetch, timeout=20, default=None)
+    return run_with_timeout(_fetch, timeout=30, default=None)
 
 
 def fetch_world_state_data() -> WorldState:
