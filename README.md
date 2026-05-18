@@ -28,15 +28,43 @@ Enter any stock ticker. In 60 seconds, the system:
 ### Option 1: Use the deployed app
 Visit the live dashboard: **[https://project-doomsday.streamlit.app/](https://project-doomsday.streamlit.app/)**
 
-### Option 2: Run locally
+### Option 2: Run locally (Supports Concurrent UI & REST API)
 1. Clone this repo
-2. Install dependencies: `pip install -r requirements.txt`
-3. Create a `.env` file:
+2. Create a `.env` file from the template:
 ```env
 GOOGLE_API_KEY=your_key_here
 TAVILY_API_KEY=your_key_here
+NVIDIA_API_KEY=optional_failover_key
+FIREWORKS_API_KEY=optional_failover_key
 ```
-4. Run: `streamlit run app.py`
+3. Run the concurrent startup script:
+   - **Windows:** Double-click `run.bat` (launches Streamlit on Port 8501 and uvicorn FastAPI server on Port 8000 in separate windows)
+   - **Unix/Mac:** Run `bash run.sh`
+
+### 🔮 Forecasting Track API Endpoint
+For the hackathon's forecasting track evaluation harness, Project Doomsday exposes a high-performance, programmatically queryable **OpenAI-Compatible REST API**.
+
+- **Endpoint:** `POST http://localhost:8000/v1/chat/completions`
+- **Request Format:** Standard OpenAI Chat Completions payload
+- **Capabilities:** Automatically extracts the target ticker (e.g. `AAPL`) and crisis stress intensity (e.g. `0.8` or `80%`) from unstructured conversational prompts, runs the complete multi-agent tribunal swarm, and responds with a premium stressed valuation executive Markdown report inside standard OpenAI choice structures.
+
+#### Request Example (cURL)
+```bash
+curl http://localhost:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "doomsday-swarm",
+    "messages": [
+      {"role": "user", "content": "Analyze AAPL with 0.85 extreme stress regime"}
+    ]
+  }'
+```
+
+#### Programmatic Verification Test
+We have provided a robust compliance test script to instantly verify the REST API without manual configuration:
+```bash
+python scratch/verify_api.py
+```
 
 ### Getting API Keys (Free)
 - **Google AI Studio (Gemini):** https://ai.google.dev

@@ -25,7 +25,10 @@ if not exist .env (
     echo WARNING: Created a new .env file. Please edit it to add your API keys.
 )
 
-rem Launch the dashboard
-echo Launching Project Doomsday...
+rem Launch the API server and the dashboard
+echo Launching Project Doomsday API Server in a new window (Port 8000)...
+start "Project Doomsday API" cmd /k "call venv\Scripts\activate.bat && uvicorn api:app --host 0.0.0.0 --port 8000"
+
+echo Launching Project Doomsday Streamlit Dashboard (Port 8501)...
 streamlit run app.py
 pause
