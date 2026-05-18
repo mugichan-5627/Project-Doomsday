@@ -30,14 +30,18 @@ Visit the live dashboard: **[https://project-doomsday.streamlit.app/](https://pr
 
 ### Option 2: Run locally (Supports Concurrent UI & REST API)
 1. Clone this repo
-2. Create a `.env` file from the template:
-```env
-GOOGLE_API_KEY=your_key_here
-TAVILY_API_KEY=your_key_here
-NVIDIA_API_KEY=optional_failover_key
-FIREWORKS_API_KEY=optional_failover_key
-```
-3. Run the concurrent startup script:
+2. Install the required dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Create a `.env` file from the template:
+   ```env
+   GOOGLE_API_KEY=your_key_here
+   TAVILY_API_KEY=your_key_here
+   NVIDIA_API_KEY=optional_failover_key
+   FIREWORKS_API_KEY=optional_failover_key
+   ```
+4. Run the concurrent startup script:
    - **Windows:** Double-click `run.bat` (launches Streamlit on Port 8501 and uvicorn FastAPI server on Port 8000 in separate windows)
    - **Unix/Mac:** Run `bash run.sh`
 
